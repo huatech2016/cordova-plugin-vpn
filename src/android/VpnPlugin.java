@@ -34,6 +34,7 @@ public class VpnPlugin extends CordovaPlugin implements LoginResultListener {
 
             final String userName = args.getString(0);
             final String passWord = args.getString(1);
+            final String vpnUrl = args.getString(2);
 
             if (this.mSFManager == null) {
                 this.mSFManager = SangforAuthManager.getInstance();// 2.设置VPN认证结果回调
@@ -47,17 +48,17 @@ public class VpnPlugin extends CordovaPlugin implements LoginResultListener {
             List<String> whiteList = new ArrayList<String>();
             whiteList.add(app.App.getMetaData(cordova.getActivity(), "VPN_PACKAGE_NAME"));
             mSFManager.addAllowedL3VPNApps(whiteList);//应用加入白名单
-            String vpnUrl = app.App.getMetaData(cordova.getActivity(), "VPN_URL");
+            //String vpnUrl = app.App.getMetaData(cordova.getActivity(), "VPN_URL");
             try {
-                if (!vpnUrl.startsWith("https://")) { //vpn地址是否是以https开头，不以https开头时，为其添加https
-                    int index = vpnUrl.indexOf("//");
-                    if (index == -1) {//没有协议头的情况下添加https协议头
-                        vpnUrl = "https://" + vpnUrl;
-                    } else {
-                        Log.info("vpn", "登录失败，url必须以https开头");
-                        return false;
-                    }
-                }
+//                if (!vpnUrl.startsWith("https://")) { //vpn地址是否是以https开头，不以https开头时，为其添加https
+//                    int index = vpnUrl.indexOf("//");
+//                    if (index == -1) {//没有协议头的情况下添加https协议头
+//                        vpnUrl = "https://" + vpnUrl;
+//                    } else {
+//                        Log.info("vpn", "登录失败，url必须以https开头");
+//                        return false;
+//                    }
+//                }
                 //将地址字符串封装成url
                 mVpnAddressURL = new URL(vpnUrl);
 
@@ -120,7 +121,9 @@ public class VpnPlugin extends CordovaPlugin implements LoginResultListener {
     @Override
     public void onLoginFailed(ErrorCode errorCode, String errorStr) {
         //停止登录进度框
-
+        PluginResult pluginResult = new PluginResult(PluginResult.Status.ERROR,errorStr);
+        pluginResult.setKeepCallback(false);
+        this.callbackContext.sendPluginResult(pluginResult);
         Log.info("vpn", "登录失败");
     }
 
